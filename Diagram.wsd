@@ -1,0 +1,163 @@
+@startuml Diagram
+Module <|-- ModuleDisplay
+Module <|-- TimerModule
+Module <|-- SensorModel
+SensorModel <|-- SensorDHTGroup
+SensorModel <|-- SensorBME280
+SensorModel <|-- SensorCO2
+TimerModule <|-- TimerDS1302
+TimerModule <|-- TimerDS1307
+TimerModule <|-- TimerDS3231
+SensorDHTGroup <.. MangerSensor
+SensorBME280 <.. MangerSensor
+SensorCO2 <.. MangerSensor
+
+struct DateAndTime {
+    + uint16_t year_ = 2023
+    + uint8_t month_ = 2
+    + uint8_t date_ = 13
+    + uint8_t weekday_ = 1
+    + uint8_t hour_ = 14
+    + uint8_t minute_ = 0
+    + uint8_t second_ = 0
+}
+
+struct Variant {
+    + union Value {
+        bool bool_value
+        float float_value
+        int8_t int8_value
+        int16_t int16_value
+        int32_t int32_value
+        uint8_t uint8_value
+        uint16_t uint16_value
+        uint32_t uint32_value
+    };
+    + Variant(ValueType vType,\nSensorDataType vTypeOfSensorData)
+    + ValueType typeOfValue
+    + SensorDataType typeOfSensorData
+    - Value value
+}
+
+enum ValueType {
+    BOOL = 0
+    FLOAT = 2
+    INT8_T = 3
+    INT16_T = 4
+    INT32_T = 5
+    UINT8_T = 6
+    UINT16_T = 7
+    UINT32_T = 8
+}
+
+enum SensorDataType {
+    Temperature = 0,
+    Pressure = 1,
+    Humidity = 2,
+    Co2 = 3,
+    Light = 4
+}
+
+enum SensorNameTPH {
+    BME_280 = 0
+    DHT_11 = DHT11
+    DHT_12 = DHT12
+    DHT_21 = DHT21
+    DHT_22 = DHT22
+    AM_2301 = AM2301
+}
+
+enum SensorNameCO2 {
+    MH_Z19b = 0
+}
+
+Abstract Class Module {
+    + void {abstract} Update()
+    + bool {abstract} Init()
+}
+
+struct ModuleInfo {
+    + SensorDataType* types = nullptr
+    + uint8_t countOfTypes = 0
+    + ModuleInfo(const uint8_t n, ...)
+    + ~ModuleInfo()
+}
+
+Abstract Class SensorModel {
+    + Variant {abstract} getData(SensorDataType type)
+    + const {abstract}ModuleInfo& getInfoModule() const
+}
+
+Class SensorDHTGroup{
+    - const ModuleInfo;
+    - DHT dht;
+    + SensorDHTGroup(int8_t module_pin_ = 2,\n uint8_t module_type_ = DHT11)
+    + Variant getData(SensorDataType type)
+    + const ModuleInfo& getInfoModule() const
+    + void Update()
+    + bool Init()
+}
+
+Class SensorBME280{
+    - const ModuleInfo;
+    - uint8_t module_address_
+    - const float mmColumn_ = 132.32f
+    - GyverBME280 BME280
+    + SensorBME280(\n uint8_t module_address_ = 0x76)
+    + Variant getData(SensorDataType type)
+    + const ModuleInfo& getInfoModule() const
+    + void Update()
+    + bool Init()
+}
+Abstract Class TimerModule {
+    + struct DateAndTime
+    # void {abstract} SetUpTimeOnModule()
+    + void SetDataAndTime(int16_t year, int8_t month,\n int8_t date, int8_t weekday, int8_t hours,\n int8_t minutes, int8_t seconds)
+    + void SetDataAndTime(DateAndTime date_time)
+    + const DateAndTime Get_data_time_()
+    # DateAndTime data_time_
+}
+
+Class TimerDS1302{
+    - ThreeWire myWire
+    - RtcDS1302<ThreeWire> Rtc
+    - RtcDateTime now
+    + TimerDS1302(uint8_t DAT,\n uint8_t CLK, uint8_t CLK)
+    - void SetUpTimeOnModule()
+    + void Update()
+    + bool Init()
+}
+
+Class TimerDS1307{
+    - RtcDS3231<TwoWire> Rtc
+    - RtcDateTime now
+    + TimerDS1307()
+    - bool wasError()
+    - void SetUpTimeOnModule()
+    + void Update()
+    + bool Init()
+}
+
+Class TimerDS3231{
+    - RtcDS3231<TwoWire> Rtc
+    - RtcDateTime now
+    + TimerDS3231()
+    - bool wasError()
+    - void SetUpTimeOnModule()
+    + void Update()
+    + bool Init()
+}
+
+Class MangerSensor{
+    - SensorModel *SensorWeather_ = nullptr
+    - SensorCO2 *sensorCO2_ = nullptr
+    - bool InitSensors(SensorModel& sensor)
+    - void addToListAllDataFromSensor();
+    + bool AddSensor(SensorNameTPH Senor)
+    + bool AddSensor(SensorNameTPH Senor, uint8_t address_or_pin)
+    + bool AddSensor(SensorNameCO2 Senor)
+    + List<Variant>& GetDataForSensors();
+    + void Update()
+}
+
+@enduml
