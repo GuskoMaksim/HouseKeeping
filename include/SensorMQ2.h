@@ -9,7 +9,6 @@ class SensorMQ2 : public SensorModel {
     const ModuleInfo moduleInfo_ = {4, SensorDataType::LPG, SensorDataType::Methane,
                                     SensorDataType::Smoke, SensorDataType::Hydrogen};
     const ValueType type;
-    const uint8_t pinA_;
     MQ2 mq2;
     Variant LPG_;
     Variant Methane_;

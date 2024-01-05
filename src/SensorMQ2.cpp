@@ -2,8 +2,7 @@
 
 SensorMQ2::SensorMQ2(uint8_t pinA)
     : type(ValueType::UINT16_T),
-      pinA_(pinA),
-      mq2(pinA_),
+      mq2(pinA),
       LPG_(type, SensorDataType::LPG),
       Methane_(type, SensorDataType::Methane),
       Smoke_(type, SensorDataType::Smoke),
@@ -29,10 +28,10 @@ Variant& SensorMQ2::getData(SensorDataType type) {
             return Hydrogen_;
             break;
         default:
-            static_assert("ERROR of getData from MH-Z19B");
+            static_assert("ERROR of getData from MQ2");
             break;
     };
-    static_assert("ERROR of getData from MH-Z19B");
+    static_assert("ERROR of getData from MQ2");
     return LPG_;
 };
 
